@@ -2,8 +2,10 @@ import Webcam from "react-webcam";
 import { useRef, useState, useEffect, useLayoutEffect } from "react";
 import { runModelUtils } from "../utils";
 import { Tensor } from "onnxruntime-web";
+import { yoloClasses } from "../data/yolo_classes";
 
 const WebcamComponent = (props: any) => {
+  const [objectCount, setObjectCount] = useState<{ [key: number]: number }>({});
   const [inferenceTime, setInferenceTime] = useState<number>(0);
   const [totalTime, setTotalTime] = useState<number>(0);
   const webcamRef = useRef<Webcam>(null);
@@ -46,7 +48,13 @@ const WebcamComponent = (props: any) => {
       data
     );
 
-    props.postprocess(outputTensor, props.inferenceTime, ctx);
+    const objCount: { [key: number]: number } = await props.postprocess(
+      outputTensor,
+      props.inferenceTime,
+      ctx
+    );
+    // console.log(objCount);
+    setObjectCount(objCount);
     setInferenceTime(inferenceTime);
   };
 
@@ -122,16 +130,16 @@ const WebcamComponent = (props: any) => {
   }
 
   return (
-    <div className="flex flex-row flex-wrap  justify-evenly align-center w-full">
+    <div className='flex flex-row flex-wrap  justify-evenly align-center w-full'>
       <div
-        id="webcam-container"
-        className="flex items-center justify-center webcam-container"
+        id='webcam-container'
+        className='flex items-center justify-center webcam-container'
       >
         <Webcam
           mirrored={facingMode === "user"}
           audio={false}
           ref={webcamRef}
-          screenshotFormat="image/jpeg"
+          screenshotFormat='image/jpeg'
           imageSmoothing={true}
           videoConstraints={{
             facingMode: facingMode,
@@ -148,7 +156,7 @@ const WebcamComponent = (props: any) => {
           forceScreenshotSourceSize={true}
         />
         <canvas
-          id="cv1"
+          id='cv1'
           ref={videoCanvasRef}
           style={{
             position: "absolute",
@@ -157,16 +165,16 @@ const WebcamComponent = (props: any) => {
           }}
         ></canvas>
       </div>
-      <div className="flex flex-col justify-center items-center">
-        <div className="flex gap-1 flex-row flex-wrap justify-center items-center m-5">
-          <div className="flex gap-1 justify-center items-center items-stretch">
+      <div className='flex flex-col justify-center items-center'>
+        <div className='flex gap-1 flex-row flex-wrap justify-center items-center m-5'>
+          <div className='flex gap-1 justify-center items-center items-stretch'>
             <button
               onClick={async () => {
                 const startTime = Date.now();
                 await processImage();
                 setTotalTime(Date.now() - startTime);
               }}
-              className="p-2 border-dashed border-2 rounded-xl hover:translate-y-1 "
+              className='p-2 border-dashed border-2 rounded-xl hover:translate-y-1 '
             >
               Capture Photo
             </button>
@@ -188,13 +196,13 @@ const WebcamComponent = (props: any) => {
               Live Detection
             </button>
           </div>
-          <div className="flex gap-1 justify-center items-center items-stretch">
+          <div className='flex gap-1 justify-center items-center items-stretch'>
             <button
               onClick={() => {
                 reset();
                 setFacingMode(facingMode === "user" ? "environment" : "user");
               }}
-              className="p-2  border-dashed border-2 rounded-xl hover:translate-y-1 "
+              className='p-2  border-dashed border-2 rounded-xl hover:translate-y-1 '
             >
               Switch Camera
             </button>
@@ -203,20 +211,21 @@ const WebcamComponent = (props: any) => {
                 reset();
                 props.changeModelResolution();
               }}
-              className="p-2  border-dashed border-2 rounded-xl hover:translate-y-1 "
+              className='p-2  border-dashed border-2 rounded-xl hover:translate-y-1 '
             >
               Change Model
             </button>
             <button
               onClick={reset}
-              className="p-2  border-dashed border-2 rounded-xl hover:translate-y-1 "
+              className='p-2  border-dashed border-2 rounded-xl hover:translate-y-1 '
             >
               Reset
             </button>
           </div>
         </div>
         <div>Using {props.modelName}</div>
-        <div className="flex gap-3 flex-row flex-wrap justify-between items-center px-5 w-full">
+        <div>Detected Class</div>
+        <div className='flex gap-3 flex-row flex-wrap justify-between items-center px-5 w-full'>
           <div>
             {"Model Inference Time: " + inferenceTime.toFixed() + "ms"}
             <br />
@@ -234,6 +243,13 @@ const WebcamComponent = (props: any) => {
                 (1000 * (1 / totalTime - 1 / inferenceTime)).toFixed(2) +
                 "fps"}
             </div>
+          </div>
+          <div>
+            {Object.entries(objectCount).map(([cls_id, count]) => (
+              <div key={cls_id}>{`Class ${
+                yoloClasses[Number(cls_id)]
+              }: ${count}`}</div>
+            ))}
           </div>
         </div>
       </div>
