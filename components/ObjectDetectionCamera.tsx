@@ -39,7 +39,7 @@ const WebcamComponent = (props: any) => {
 
   const runModel = async (ctx: CanvasRenderingContext2D) => {
     const data = props.preprocess(ctx);
-    let outputTensor: Tensor;
+    let outputTensor: { dets: Tensor; labels: Tensor };
     let inferenceTime: number;
     [outputTensor, inferenceTime] = await runModelUtils.runModel(
       props.session,

@@ -9,9 +9,10 @@ import { useEffect } from "react";
 import { runModelUtils } from "../../utils";
 
 const RES_TO_MODEL: [number[], string][] = [
-  [[256,256], "yolov7-tiny_256x256.onnx"],
-  [[320, 320], "yolov7-tiny_320x320.onnx"],
-  [[640, 640], "yolov7-tiny_640x640.onnx"],
+  // [[256,256], "yolov7-tiny_256x256.onnx"],
+  // [[320, 320], "yolov7-tiny_320x320.onnx"],
+  // [[640, 640], "yolov7-tiny_640x640.onnx"],
+  [[640, 640], "end2end.onnx"],
 ];
 
 const Yolo = (props: any) => {
@@ -137,31 +138,42 @@ const Yolo = (props: any) => {
   };
 
   const postprocess = async (
-    tensor: Tensor,
+    output: { dets: Tensor; labels: Tensor },
     inferenceTime: number,
     ctx: CanvasRenderingContext2D
   ) => {
+
+    // console.log(output);
+
     const dx = ctx.canvas.width / modelResolution[0];
     const dy = ctx.canvas.height / modelResolution[1];
 
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    for (let i = 0; i < tensor.dims[0]; i++) {
-      let [batch_id, x0, y0, x1, y1, cls_id, score] = tensor.data.slice(
-        i * 7,
-        i * 7 + 7
+    for (let i = 0; i < output.dets.dims[1]; i++) {
+      let [x0, y0, x1, y1, score] = output.dets.data.slice(
+        i * 5,
+        i * 5 + 5
       );
+      
+      const decimalScore = parseFloat(score as string);
+
+      // Check if the decimalScore is less than 0.5
+      if (decimalScore < 0.5) {
+        continue;
+      }
+    
+
+      const cls_id = Number(output.labels.data[i]);
 
       // scale to canvas size
       [x0, x1] = [x0, x1].map((x: any) => x * dx);
       [y0, y1] = [y0, y1].map((x: any) => x * dy);
 
-      [batch_id, x0, y0, x1, y1, cls_id] = [
-        batch_id,
+      [x0, y0, x1, y1] = [
         x0,
         y0,
         x1,
         y1,
-        cls_id,
       ].map((x: any) => round(x));
 
       [score] = [score].map((x: any) => round(x * 100, 1));
