@@ -15,6 +15,7 @@ const RES_TO_MODEL: [number[], string][] = [
   // [[640, 640], "end2end.onnx"],
   // [[640, 640], "end2end_fp16.onnx"],
   // [[640, 640], "end2end.onnx"],
+  // [[640, 640], "end2end_quant.onnx"],
   [[640, 640], "end2end.with_runtime_opt.ort"],
 ];
 
@@ -27,10 +28,16 @@ const Yolo = (props: any) => {
 
   useEffect(() => {
     const getSession = async () => {
-      const session = await runModelUtils.createModelCpu(
-        `./_next/static/chunks/pages/${modelName}`
-      );
-      setSession(session);
+      try {
+        const session = await runModelUtils.createModelCpu(
+          `./_next/static/chunks/pages/${modelName}`
+        );
+        setSession(session);
+      } catch (error) {
+        console.error("Error while creating session:", error);
+        // You can choose to handle the error in a specific way or rethrow it
+        throw error;
+      }
     };
     getSession();
   }, [modelName]);
