@@ -14,7 +14,8 @@ const RES_TO_MODEL: [number[], string][] = [
   // [[640, 640], "yolov7-tiny_640x640.onnx"],
   // [[640, 640], "end2end.onnx"],
   // [[640, 640], "end2end_fp16.onnx"],
-  [[256, 256], "yolov8s.ort"],
+  // [[256, 256], "yolov8s.ort"],
+  [[256, 256], "yolov8s_opt.ort"],
   // [[640, 640], "end2end_quant.onnx"],
   // [[640, 640], "end2end.with_runtime_opt.ort"],
 ];
