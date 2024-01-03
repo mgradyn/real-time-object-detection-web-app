@@ -168,7 +168,7 @@ const WebcamComponent = (props: any) => {
       <div className='flex flex-col justify-center items-center'>
         <div className='flex gap-1 flex-row flex-wrap justify-center items-center m-5'>
           <div className='flex gap-1 justify-center items-center items-stretch'>
-            <button
+            {/* <button
               onClick={async () => {
                 const startTime = Date.now();
                 await processImage();
@@ -177,7 +177,7 @@ const WebcamComponent = (props: any) => {
               className='p-2 border-dashed border-2 rounded-xl hover:translate-y-1 '
             >
               Capture Photo
-            </button>
+            </button> */}
             <button
               onClick={async () => {
                 if (liveDetection.current) {
@@ -188,7 +188,7 @@ const WebcamComponent = (props: any) => {
               }}
               //on hover, shift the button up
               className={`
-              p-2  border-dashed border-2 rounded-xl hover:translate-y-1 
+              p-2  border border-2 rounded-xl hover:translate-y-1 
               ${liveDetection.current ? "bg-white text-black" : ""}
               
               `}
@@ -197,7 +197,7 @@ const WebcamComponent = (props: any) => {
             </button>
           </div>
           <div className='flex gap-1 justify-center items-center items-stretch'>
-            <button
+            {/* <button
               onClick={() => {
                 reset();
                 setFacingMode(facingMode === "user" ? "environment" : "user");
@@ -214,19 +214,21 @@ const WebcamComponent = (props: any) => {
               className='p-2  border-dashed border-2 rounded-xl hover:translate-y-1 '
             >
               Change Model
-            </button>
-            <button
+            </button> */}
+            {/* <button
               onClick={reset}
               className='p-2  border-dashed border-2 rounded-xl hover:translate-y-1 '
             >
               Reset
-            </button>
+            </button> */}
           </div>
         </div>
-        <div>Using {props.modelName}</div>
-        <div>Detected Class</div>
-        <div className='flex gap-3 flex-row flex-wrap justify-between items-center px-5 w-full'>
-          <div>
+        {/* <div>Using {props.modelName}</div> */}
+        {
+           Object.keys(objectCount).length > 0 &&  <div>Detected Class</div>
+        }
+        <div className='flex gap-3 flex-row flex-wrap justify-center items-center px-5 w-full'>
+          {/* <div>
             {"Model Inference Time: " + inferenceTime.toFixed() + "ms"}
             <br />
             {"Total Time: " + totalTime.toFixed() + "ms"}
@@ -243,8 +245,8 @@ const WebcamComponent = (props: any) => {
                 (1000 * (1 / totalTime - 1 / inferenceTime)).toFixed(2) +
                 "fps"}
             </div>
-          </div>
-          <div>
+          </div> */}
+          <div className="grid grid-cols-2 gap-4">
             {Object.entries(objectCount).map(([cls_id, count]) => (
               <div key={cls_id}>{`Class ${
                 yoloClasses[Number(cls_id)]
